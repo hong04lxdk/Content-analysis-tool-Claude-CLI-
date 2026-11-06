@@ -1,58 +1,31 @@
-# Claude content analysis tool
+Claude content analysis tool
 
-绑定 **Claude Code** 启动的 Windows 桌面小工具（插件 `claude-content-analysis-tool`）。启动即显示主窗口，提供两个可独立开关的服务：
+绑定 **Claude Code** 启动的 Windows 桌面小工具（插件名 `claude-content-analysis-tool`）。启动即显示主窗口，提供两个可独立开关的服务：
 
 - **解释**：输入内容 → LLM（Claude setting / 本地 Ollama）分析解释。
-- **翻译**：复制文字 → 光标旁弹窗；常用语言 ⇄ 目标语言双向互译，其它语言不翻。引擎 Google，无需 Key。
+- **翻译**：复制任意文字 → 光标旁弹窗；**常用语言 ⇄ 目标语言双向互译**，其它语言不翻。引擎为 Google，无需 API Key。
 
-`Ctrl+Enter` 触发解释；关闭主窗口即退出。需要 Python 3.8+（含 tkinter），依赖仅 `requests`。
 
-## 安装
-
-```bash
-# <仓库目录> 换成本仓库实际路径
-claude plugin validate "<仓库目录>/claude-content-analysis-tool"
-claude plugin marketplace add "<仓库目录>/claude-content-analysis-tool-marketplace"
-claude plugin install claude-content-analysis-tool@claude-content-analysis-tool-marketplace --scope user
-```
-
-`SessionStart` hook 用 PATH 中的 `python` 拉起工具，重启 Claude Code 会话后自动显示主窗口。安装后运行的是 cache 副本：
-
-```
-~/.claude/plugins/cache/claude-content-analysis-tool-marketplace/claude-content-analysis-tool/0.1.0/
-```
-
-改源码后需同步到该目录并重启工具。
-
-## 用法
-
-1. 输入内容 →「解释」（或 `Ctrl+Enter`），结果显示在输出区。
-2. 输入内容 →「翻译」；或在任意程序里复制文字，光标旁弹窗。
-3. 右上角「设置」：服务开关、模型配置、翻译参数；改完点「应用并生效」。
-   修改 Claude 模型后需手动点「刷新」。
-
-Claude Code 内通过插件技能 `translate` 控制：
-
-```text
-/claude-content-analysis-tool:translate status|on|off
-/claude-content-analysis-tool:translate llm claude|local
-/claude-content-analysis-tool:translate explain on|off
-/claude-content-analysis-tool:translate translate on|off
-```
-
-不依赖 Claude 时可直接运行：
+### 绿色版（不需要插件）
 
 ```bash
-python start_translate.py   # 启动（已运行则唤醒；优先启动 ContentAnalysisTool.exe）
-python stop_translate.py    # 停止
-python status.py            # 状态
+python build_release.py          # 或双击 build_release.bat
 ```
 
-主程序是单文件 `ContentAnalysisTool.exe`（`translate_tool.py` 打包）：主窗口与设置（同进程 `Toplevel`）都在里面，单实例运行。
+产物 `dist/ContentAnalysisTool-0.1.0/`（exe + 便携 `config.json` + 说明）及同名 zip，双击 exe 即可运行。
+
+## 使用
+
+1. **解释**：输入内容 → 「解释」或 `Ctrl+Enter`。
+2. **翻译**：输入内容 → 「翻译」；或在任意程序里复制文字，光标旁弹出译文。
+3. **设置**：右上角「设置」或托盘右键「设置」→ 开关服务、配置模型与翻译参数 → 「应用并生效」。
+   修改 Claude 模型后需手动点「刷新」（没有定时自动刷新）。
+
+Claude Code 内使用插件技能 `translate`：
 
 ## 配置
 
-配置文件查找顺序：插件 cache → 源码/便携目录 → `%LOCALAPPDATA%\ContentAnalysisTool\config.json`。
+配置查找顺序：插件 cache → 源码/便携目录 → `%LOCALAPPDATA%\ContentAnalysisTool\config.json`。
 
 ```json
 {
@@ -72,48 +45,33 @@ python status.py            # 状态
 }
 ```
 
-`llms.claude` 留空 = 复用 `~/.claude/settings.json` 的 `ANTHROPIC_BASE_URL`、`ANTHROPIC_AUTH_TOKEN`（或 `ANTHROPIC_API_KEY`）与 `model`；填了就覆盖。
+仓库里的 `config.json` 是默认模板，不含个人模型、端点或 Token。
 
-命令行修改（即时生效）：
+## 打包
 
 ```bash
-python config.py show
-python config.py llm local
-python config.py commonlang zh-CN
-python config.py lang en
-python config.py popup 12
-python config.py fontsize 16
-python config.py minlen 3
-python config.py model <模型名>
-python config.py localmodel qwen2.5:7b
-python config.py explain off
-python config.py translate on
+pip install -r claude-content-analysis-tool/requirements.txt
+python build_release.py          # --no-zip 只出目录；--keep-dist 保留旧目录
 ```
 
-## 发布打包
+## 目录
 
-在 marketplace 根目录执行 `python build_release.py`（或双击 `build_release.bat`）：
-
+```text
+claude-content-analysis-tool/
+├─ .claude-plugin/marketplace.json
+├─ claude-content-analysis-tool/     # 插件本体
+│  ├─ .claude-plugin/plugin.json     # 含 SessionStart hook
+│  ├─ translate_tool.py              # 主程序：主窗口 + 划词翻译
+│  ├─ config_gui.py / config_lib.py  # 设置面板 / 配置读写
+│  ├─ start_translate.py / stop_translate.py / status.py
+│  ├─ commands/translate.md          # Claude Code 技能 translate
+│  └─ config.json
+├─ build_release.py / build_release.bat
+└─ dist/                             # 打包产物（已忽略）
 ```
-dist/
-  ContentAnalysisTool-<版本>/
-    ContentAnalysisTool.exe     单文件、无控制台、免安装
-    config.json                 便携配置（默认值，不含个人信息）
-    README.md
-    使用说明.txt
-  ContentAnalysisTool-<版本>-win64.zip
-```
 
-独立运行时优先读取 exe 同目录的 `config.json`，其次 `%LOCALAPPDATA%\ContentAnalysisTool\config.json`。
+## 常见问题
 
-## 文件
-
-| 文件 | 说明 |
-|------|------|
-| `translate_tool.py` | 主程序：主窗口 + 剪贴板划词翻译 + 单实例 |
-| `config_gui.py` / `config_lib.py` | 设置面板 / 配置读写 |
-| `start_translate.py` / `stop_translate.py` / `status.py` | 启动 / 停止 / 状态 |
-| `config.py` / `set_engine.py` | 配置命令行 |
-| `commands/translate.md` | Claude Code 技能 `translate` |
-| `.claude-plugin/plugin.json` | 插件清单（含 SessionStart hook） |
-| `config.json` | 默认配置模板 |
+- **复制后没弹窗**：只在复制（写剪贴板）时触发；前台是工具自身、文本过短/过长或翻译服务关闭时不会弹。
+- **本地模型失败**：确认 Ollama 已启动，地址与 `ollama list` 中的模型名正确。
+- **Claude setting 失败**：`~/.claude/settings.json` 需有 `ANTHROPIC_BASE_URL` 和 `ANTHROPIC_AUTH_TOKEN`（或 `ANTHROPIC_API_KEY`）。

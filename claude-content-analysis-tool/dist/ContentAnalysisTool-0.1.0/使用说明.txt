@@ -1,0 +1,29 @@
+﻿Claude content analysis tool  0.1.0
+
+【启动】
+双击 ContentAnalysisTool.exe 即可（绿色版，不需要安装 Python）。
+
+【主窗口】
+- 输入内容 → 「解释」：由 LLM（Claude setting / 本地模型）分析解释。
+- 输入内容 → 「翻译」：常用语言 ⇄ 目标语言 双向互译。
+- 选中任意文字并按 Ctrl+C 复制，光标旁会弹出翻译（只翻常用语言和目标语言，
+  其它语言不翻译）。
+- 右上角「设置」：服务开关、模型配置、翻译设置。改完点「应用并生效」。
+
+【托盘】
+- 关闭主窗口 = 收进系统托盘，程序继续在后台做划词翻译。
+- 左键点托盘图标：重新显示主窗口。
+- 右键点托盘图标：菜单「设置 / 退出」；「退出」才真正结束程序。
+
+【LLM】
+- Claude setting：读取 ~/.claude/settings.json 的
+  ANTHROPIC_BASE_URL / ANTHROPIC_AUTH_TOKEN / model。
+- 本地模型：Ollama，地址默认 http://localhost:11434，模型名填 Ollama 里已有的。
+
+【配置文件】
+- config.json 与本 exe 同目录 = 便携配置（推荐，随目录一起带走）。
+- 若 exe 所在目录不可写，会自动改用
+  %LOCALAPPDATA%\ContentAnalysisTool\config.json。
+
+【卸载】
+绿色程序，删除整个目录即可。

@@ -1,0 +1,26 @@
+{
+  "llm": "claude",
+  "common_lang": "zh-CN",
+  "target_lang": "en",
+  "engine": "google",
+  "service_explain": true,
+  "service_translate": true,
+  "popup_seconds": 8.0,
+  "font_size": 8,
+  "min_len": 2,
+  "max_len": 2000,
+  "engines": {
+    "google": {}
+  },
+  "llms": {
+    "claude": {
+      "model": "deepseek-flash",
+      "base_url": "",
+      "auth_token": ""
+    },
+    "local": {
+      "model": "qwen3.5:14b",
+      "base_url": "http://localhost:11434"
+    }
+  }
+}
